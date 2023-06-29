@@ -687,7 +687,7 @@ class behavpy_HMM(behavpy):
         else:
             df_list = [self.copy(deep = True)]
 
-        decoded_dict = {f'df{n}' : self._hmm_decode(d, h, b, variable, func) for n, d, h, b in zip(facet_arg, df_list, h_list, b_list)}
+        decoded_dict = {f'df{l}' : self._hmm_decode(d, h, b, variable, func) for n, l, d, h, b in zip(facet_arg, facet_labels, df_list, h_list, b_list)}
 
         def analysis(array_states):
             rows = []
@@ -701,7 +701,7 @@ class behavpy_HMM(behavpy):
             counts_all.fillna(0, inplace = True)
             return counts_all
 
-        analysed_dict = {f'df{n}' : analysis(decoded_dict[f'df{n}'][0]) for n in facet_arg}
+        analysed_dict = {f'df{l}' : analysis(decoded_dict[f'df{l}'][0]) for l in facet_labels}
         
         fig = go.Figure()
         self._plot_ylayout(fig, yrange = [0, 1.01], t0 = 0, dtick = 0.2, ylabel = 'Fraction of time in each state', title = title, grid = grids)
@@ -710,14 +710,14 @@ class behavpy_HMM(behavpy):
 
         for state, col, lab in zip(list_states, colours, labels):
 
-            for arg, i in zip(facet_arg, facet_labels):
+            for i in facet_labels:
                 
                 try:
-                    median, q3, q1, zlist = self._zscore_bootstrap(analysed_dict[f'df{arg}'][state].to_numpy())
+                    median, q3, q1, zlist = self._zscore_bootstrap(analysed_dict[f'df{i}'][state].to_numpy())
                 except KeyError:
                     median, q3, q1, zlist = [0], [0], [0], [np.nan]
                 
-                stats_dict[f'{arg}_{lab}'] = zlist
+                stats_dict[f'{i}_{lab}'] = zlist
 
                 if 'baseline' in i.lower() or 'control' in i.lower() or 'ctrl' in i.lower():
                     if 'rebound' in i.lower():
@@ -756,7 +756,7 @@ class behavpy_HMM(behavpy):
         else:
             df_list = [self.copy(deep = True)]
 
-        decoded_dict = {f'df{n}' : self._hmm_decode(d, h, b, variable, func) for n, d, h, b in zip(facet_arg, df_list, h_list, b_list)}
+        decoded_dict = {f'df{l}' : self._hmm_decode(d, h, b, variable, func) for l, d, h, b in zip(facet_labels, df_list, h_list, b_list)}
 
         def analysis(states, t_diff):
             df_lengths = pd.DataFrame()
@@ -765,24 +765,24 @@ class behavpy_HMM(behavpy):
                 df_lengths = pd.concat([df_lengths, length], ignore_index= True)
             return df_lengths
 
-        analysed_dict = {f'df{n}' : analysis(decoded_dict[f'df{n}'][0], b) for n, b in zip(facet_arg, b_list)}
+        analysed_dict = {f'df{l}' : analysis(decoded_dict[f'df{l}'][0], b) for l, b in zip(facet_labels, b_list)}
 
         fig = go.Figure()
         self._plot_ylayout(fig, yrange = False, t0 = 0, dtick = 0.69897000433, ylabel = 'Length of state bout (mins)', ytype = 'log', title = title, grid = grids)
 
-        gb_dict = {f'gb{n}' : analysed_dict[f'df{n}'].groupby('state') for n in facet_arg}
+        gb_dict = {f'gb{l}' : analysed_dict[f'df{l}'].groupby('state') for l in facet_labels}
 
         stats_dict = {}
 
         for state, col, lab in zip(list_states, colours, labels):
 
-            for arg, i in zip(facet_arg, facet_labels):
+            for i in facet_labels:
 
                 try:
-                    median, q3, q1, zlist = self._zscore_bootstrap(gb_dict[f'gb{arg}'].get_group(state)['mean_length'].to_numpy())
+                    median, q3, q1, zlist = self._zscore_bootstrap(gb_dict[f'gb{i}'].get_group(state)['mean_length'].to_numpy())
                 except KeyError:
                     median, q3, q1, zlist = [0], [0], [0], [np.nan]
-                stats_dict[f'{arg}_{lab}'] = zlist
+                stats_dict[f'{i}_{lab}'] = zlist
 
                 if 'baseline' in i or 'control' in i:
                     if 'rebound' in i:
@@ -821,7 +821,7 @@ class behavpy_HMM(behavpy):
         else:
             df_list = [self.copy(deep = True)]
 
-        decoded_dict = {f'df{n}' : self._hmm_decode(d, h, b, variable, func) for n, d, h, b in zip(facet_arg, df_list, h_list, b_list)}
+        decoded_dict = {f'df{l}' : self._hmm_decode(d, h, b, variable, func) for n, l, d, h, b in zip(facet_arg, facet_labels, df_list, h_list, b_list)}
 
         def analysis(states, t_diff):
             df_lengths = pd.DataFrame()
@@ -830,19 +830,19 @@ class behavpy_HMM(behavpy):
                 df_lengths = pd.concat([df_lengths, length], ignore_index= True)
             return df_lengths
 
-        analysed_dict = {f'df{n}' : analysis(decoded_dict[f'df{n}'][0], b) for n, b in zip(facet_arg, b_list)}
+        analysed_dict = {f'df{l}' : analysis(decoded_dict[f'df{l}'][0], b) for n, b in zip(facet_labels, b_list)}
 
         fig = go.Figure()
         self._plot_ylayout(fig, yrange = False, t0 = 0, dtick = 0.69897000433, ylabel = 'Length of state bout (mins)', ytype = 'log', title = title, grid = grids)
 
-        gb_dict = {f'gb{n}' : analysed_dict[f'df{n}'].groupby('state') for n in facet_arg}
+        gb_dict = {f'gb{l}' : analysed_dict[f'df{l}'].groupby('state') for l in facet_labels}
 
         for state, col, lab in zip(list_states, colours, labels):
 
-            for arg, i in zip(facet_arg, facet_labels):
+            for i in facet_labels:
                 
                 try:
-                    median, q3, q1, _ = self._zscore_bootstrap(gb_dict[f'gb{arg}'].get_group(state)['length_adjusted'].to_numpy(), min_max = True)
+                    median, q3, q1, _ = self._zscore_bootstrap(gb_dict[f'gb{i}'].get_group(state)['length_adjusted'].to_numpy(), min_max = True)
                 except KeyError:
                     median, q3, q1 = [0], [0], [0]
 
@@ -876,7 +876,7 @@ class behavpy_HMM(behavpy):
         else:
             df_list = [self.copy(deep = True)]
 
-        decoded_dict = {f'df{n}' : self._hmm_decode(d, h, b, variable, func) for n, d, h, b in zip(facet_arg, df_list, h_list, b_list)}
+        decoded_dict = {f'df{l}' : self._hmm_decode(d, h, b, variable, func) for n, l, d, h, b in zip(facet_arg, facet_labels, df_list, h_list, b_list)}
 
         def analysis(states):
             df_trans = pd.DataFrame()
@@ -885,7 +885,7 @@ class behavpy_HMM(behavpy):
                 df_trans = pd.concat([df_trans, trans], ignore_index= True)
             return df_trans
 
-        analysed_dict = {f'df{n}' : analysis(decoded_dict[f'df{n}'][0]) for n in facet_arg}
+        analysed_dict = {f'df{l}' : analysis(decoded_dict[f'df{l}'][0]) for l in facet_labels}
 
         fig = go.Figure()
         self._plot_ylayout(fig, yrange = [0, 1.05], t0 = 0, dtick = 0.2, ylabel = 'Fraction of runs of each state', title = title, grid = grids)
@@ -894,14 +894,14 @@ class behavpy_HMM(behavpy):
 
         for state, col, lab in zip(list_states, colours, labels):
 
-            for arg, i in zip(facet_arg, facet_labels):
+            for i in facet_labels:
                 
                 try:
-                    median, q3, q1, zlist = self._zscore_bootstrap(analysed_dict[f'df{arg}'][str(state)].to_numpy())  
+                    median, q3, q1, zlist = self._zscore_bootstrap(analysed_dict[f'df{i}'][str(state)].to_numpy())  
                 except KeyError:
                     median, q3, q1, zlist = [0], [0], [0], [np.nan]
 
-                stats_dict[f'{arg}_{lab}'] = zlist
+                stats_dict[f'{i}_{lab}'] = zlist
 
                 if 'baseline' in i.lower() or 'control' in i.lower():
                     if 'rebound' in i.lower():
@@ -1097,8 +1097,8 @@ class behavpy_HMM(behavpy):
             df_list = [self.copy(deep = True)]
             mov_df_list = [mov_df.copy(deep = True)]
 
-        decoded_dict = {f'df{n}' : self._hmm_decode(d, h, b, variable, func, return_type = 'table') for n, d, h, b in zip(facet_arg, mov_df_list, h_list, b_list)}
-        puff_dict = {f'pdf{n}' : d for n, d in zip(facet_arg, df_list)}
+        decoded_dict = {f'df{l}' : self._hmm_decode(d, h, b, variable, func, return_type = 'table') for n, l, d, h, b in zip(facet_arg, facet_labels, mov_df_list, h_list, b_list)}
+        puff_dict = {f'pdf{l}' : d for l, d in zip(facet_labels, df_list)}
 
         def alter_merge(data, puff):
             puff['bin'] = puff['interaction_t'].map(lambda t:  60 * floor(t / 60))
@@ -1120,7 +1120,7 @@ class behavpy_HMM(behavpy):
 
             return interaction_dict
 
-        analysed_dict = {f'df{n}' : alter_merge(decoded_dict[f'df{n}'], puff_dict[f'pdf{n}']) for n in facet_arg}
+        analysed_dict = {f'df{l}' : alter_merge(decoded_dict[f'df{l}'], puff_dict[f'pdf{l}']) for l in facet_labels}
         
         fig = go.Figure()
         self._plot_ylayout(fig, yrange = [0, 1.01], t0 = 0, dtick = 0.2, ylabel = 'Response Rate', title = title, grid = grids)
@@ -1129,15 +1129,15 @@ class behavpy_HMM(behavpy):
 
         for state, col, lab in zip(list_states, colours, labels):
 
-            for arg, i in zip(facet_arg, facet_labels):
+            for i in facet_labels:
 
                 for q in [2, 1]:
                     try:
-                        median, q3, q1, zlist = self._zscore_bootstrap(analysed_dict[f'df{arg}'][f'int_{q}'][state])
+                        median, q3, q1, zlist = self._zscore_bootstrap(analysed_dict[f'df{i}'][f'int_{q}'][state])
                     except KeyError:
                         continue
 
-                    stats_dict[f'{arg}_{lab}_{q}'] = zlist
+                    stats_dict[f'{i}_{lab}_{q}'] = zlist
 
                     if q == 2:
                         lab = f'{i} Spon. mov.'
