@@ -2208,10 +2208,10 @@ class behavpy(pd.DataFrame):
         """
 
         if start_time > end_time:
-            raise KeyError('The start time can not be greater than the end time')
+            raise ValueError('The start time can not be greater than the end time')
 
         if start_time < 0:
-            raise KeyError('The start time can not be less than zero')
+            raise ValueError('The start time can not be less than zero')
 
         if remove is not False:
             if remove >= 0 and remove < 1:
