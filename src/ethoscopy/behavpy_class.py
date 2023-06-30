@@ -2238,7 +2238,7 @@ class behavpy(pd.DataFrame):
             return gb
         else:
             remove_ids = gb[gb['Percent Asleep'] > remove].index.tolist()
-            return df.remove('id', remove_ids)
+            return self.remove('id', remove_ids)
 
     def make_tile(self, facet_tile, plot_fun, rows = None, cols = None):
         """ A wrapper to take any behavpy plot and create a tile plot
